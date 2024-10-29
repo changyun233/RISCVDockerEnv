@@ -24,8 +24,9 @@ WORKDIR /tmp
 
 # Build 32/64 bits RISC-V toolchain for both newlib and linux 
 # I have 96 threads CPU on my server so I used jobs parameter 
-RUN git clone --depth=1 --jobs $(($(nproc)/4)) --recursive https://github.com/riscv/riscv-gnu-toolchain \
-    && mkdir -p /opt/riscv32 \
+COPY ../riscv-gnu-toolchain /tmp/riscv-gnu-toolchain
+
+RUN mkdir -p /opt/riscv32 \
     && mkdir -p /opt/riscv64 \
     && cd /tmp/riscv-gnu-toolchain \
     && ./configure --prefix=/opt/riscv32 --with-arch=rv32gc --with-abi=ilp32d --enable-gdb \
@@ -33,7 +34,7 @@ RUN git clone --depth=1 --jobs $(($(nproc)/4)) --recursive https://github.com/ri
     # && ./configure --prefix=/opt/riscv32 --with-arch=rv32gc --with-abi=ilp32d --enable-gdb \
     && make -j $(nproc) linux && make clean \
     # Here we build 64 bits version
-    && ./configure --prefix=/opt/riscv64 --enable-gdb \
+    && ./configure --prefix=/opt/riscv64 --enable-gdb --with-extra-multilib-test="rv64gcv-lp64d;rv64gcv_zba-lp64d;rv64g-lp64;rv64gc-lp64"\
     && make -j $(nproc) && make clean \
     # && ./configure --prefix=/opt/riscv64 --enable-gdb \
     && make -j $(nproc) linux && make clean \
